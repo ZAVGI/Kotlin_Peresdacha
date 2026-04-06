@@ -1,6 +1,8 @@
 package com.peresdacha.worker
 
+import com.rabbitmq.client.CancelCallback
 import com.rabbitmq.client.ConnectionFactory
+import com.rabbitmq.client.DeliverCallback
 import org.slf4j.LoggerFactory
 
 class OrderWorker(rabbitHost: String) {
@@ -12,10 +14,14 @@ class OrderWorker(rabbitHost: String) {
         val connection = factory.newConnection()
         val channel = connection.createChannel()
         channel.queueDeclare(queueName, true, false, false, null)
-        channel.basicConsume(queueName, true) { _, delivery ->
+
+        val deliverCallback = DeliverCallback { _, delivery ->
             val body = String(delivery.body)
             log.info("Order event received: $body")
             log.info("Fake email sent for event=$body")
-        } { _ -> }
+        }
+        val cancelCallback = CancelCallback { }
+
+        channel.basicConsume(queueName, true, deliverCallback, cancelCallback)
     }
 }

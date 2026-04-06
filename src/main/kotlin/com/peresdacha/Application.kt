@@ -66,7 +66,7 @@ fun Application.module() {
             call.respond(io.ktor.http.HttpStatusCode.BadRequest, ApiError("BUSINESS_ERROR", cause.message ?: "Unknown"))
         }
         exception<Throwable> { call, cause ->
-            environment.log.error("Unhandled error", cause)
+            this@module.environment.log.error("Unhandled error", cause)
             call.respond(io.ktor.http.HttpStatusCode.InternalServerError, ApiError("INTERNAL", "Unexpected error"))
         }
     }

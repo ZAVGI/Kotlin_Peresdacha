@@ -8,6 +8,7 @@ import com.peresdacha.domain.OrderStatus
 import kotlinx.datetime.Instant
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -20,15 +21,15 @@ class OrderRepository {
     fun create(userId: Long, items: List<OrderItem>): Order = transaction {
         val orderId = OrdersTable.insertAndGetId {
             it[OrdersTable.userId] = userId
-            it[status] = OrderStatus.CREATED.name
-            it[createdAt] = LocalDateTime.now()
+            it[OrdersTable.status] = OrderStatus.CREATED.name
+            it[OrdersTable.createdAt] = LocalDateTime.now()
         }.value
         items.forEach { item ->
             OrderItemsTable.insertAndGetId {
                 it[OrderItemsTable.orderId] = orderId
-                it[productId] = item.productId
-                it[quantity] = item.quantity
-                it[priceSnapshot] = BigDecimal.valueOf(item.priceSnapshot)
+                it[OrderItemsTable.productId] = item.productId
+                it[OrderItemsTable.quantity] = item.quantity
+                it[OrderItemsTable.priceSnapshot] = BigDecimal.valueOf(item.priceSnapshot)
             }
         }
         findById(orderId)!!
@@ -43,8 +44,8 @@ class OrderRepository {
     }
 
     fun cancel(orderId: Long, userId: Long): Boolean = transaction {
-        OrdersTable.update({ OrdersTable.id.eq(orderId) and OrdersTable.userId.eq(userId) }) {
-            it[status] = OrderStatus.CANCELLED.name
+        OrdersTable.update({ (OrdersTable.id eq orderId) and (OrdersTable.userId eq userId) }) {
+            it[OrdersTable.status] = OrderStatus.CANCELLED.name
         } > 0
     }
 
@@ -68,6 +69,6 @@ class OrderRepository {
         id = this[OrdersTable.id].value,
         userId = this[OrdersTable.userId].value,
         status = OrderStatus.valueOf(this[OrdersTable.status]),
-        createdAt = Instant.fromEpochMilliseconds(this[OrdersTable.createdAt].toInstant(ZoneOffset.UTC).toEpochMilli()),
+        createdAt = Instant.fromEpochMilliseconds(this[OrdersTable.createdAt].toEpochSecond(ZoneOffset.UTC) * 1000),
     )
 }

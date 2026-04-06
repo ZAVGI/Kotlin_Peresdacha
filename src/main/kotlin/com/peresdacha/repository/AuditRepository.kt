@@ -12,7 +12,7 @@ class AuditRepository {
                 it[AuditLogsTable.userId] = userId
                 it[AuditLogsTable.action] = action
                 it[AuditLogsTable.payload] = payload
-                it[createdAt] = LocalDateTime.now()
+                it[AuditLogsTable.createdAt] = LocalDateTime.now()
             }
         }
     }
