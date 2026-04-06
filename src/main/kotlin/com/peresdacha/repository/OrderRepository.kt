@@ -14,15 +14,13 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import java.math.BigDecimal
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 class OrderRepository {
     fun create(userId: Long, items: List<OrderItem>): Order = transaction {
         val orderId = OrdersTable.insertAndGetId {
             it[OrdersTable.userId] = userId
             it[OrdersTable.status] = OrderStatus.CREATED.name
-            it[OrdersTable.createdAt] = LocalDateTime.now()
+            it[OrdersTable.createdAt] = java.time.Instant.now()
         }.value
         items.forEach { item ->
             OrderItemsTable.insertAndGetId {
@@ -69,6 +67,6 @@ class OrderRepository {
         id = this[OrdersTable.id].value,
         userId = this[OrdersTable.userId].value,
         status = OrderStatus.valueOf(this[OrdersTable.status]),
-        createdAt = Instant.fromEpochMilliseconds(this[OrdersTable.createdAt].toEpochSecond(ZoneOffset.UTC) * 1000),
+        createdAt = Instant.fromEpochMilliseconds(this[OrdersTable.createdAt].toEpochMilli()),
     )
 }
