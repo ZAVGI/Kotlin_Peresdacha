@@ -1,0 +1,45 @@
+version: '3.9'
+services:
+  app:
+    build: .
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/app
+      DB_USER: app
+      DB_PASSWORD: app
+      REDIS_URL: redis://redis:6379
+      RABBIT_HOST: rabbitmq
+      JWT_SECRET: super-secret
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+
+  worker:
+    build: .
+    environment:
+      APP_MODE: worker
+      RABBIT_HOST: rabbitmq
+    depends_on:
+      - rabbitmq
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: app
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"

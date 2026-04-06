@@ -1,0 +1,67 @@
+openapi: 3.0.3
+info:
+  title: Peresdacha Shop API
+  version: 1.0.0
+paths:
+  /auth/register:
+    post:
+      summary: Register user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example: {"email":"user@mail.com","password":"secret"}
+      responses:
+        '200':
+          description: JWT token
+  /auth/login:
+    post:
+      summary: Login user
+      responses:
+        '200': { description: JWT token }
+  /products:
+    get:
+      summary: List products
+      responses:
+        '200': { description: Product list }
+    post:
+      summary: Create product (admin)
+      responses:
+        '201': { description: Product created }
+  /products/{id}:
+    get:
+      summary: Product by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Product }
+    put:
+      summary: Update product (admin)
+      responses:
+        '204': { description: Updated }
+    delete:
+      summary: Delete product (admin)
+      responses:
+        '204': { description: Deleted }
+  /orders:
+    post:
+      summary: Create order
+      responses:
+        '201': { description: Order created }
+    get:
+      summary: User order history
+      responses:
+        '200': { description: List orders }
+  /orders/{id}:
+    delete:
+      summary: Cancel order
+      responses:
+        '204': { description: Canceled }
+  /stats/orders:
+    get:
+      summary: Orders stats (admin only)
+      responses:
+        '200': { description: Stats }
